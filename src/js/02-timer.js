@@ -32,10 +32,9 @@ const options = {
 
     buttonStart.addEventListener('click', function () {
       if (!userDate) return;
-      console.log(userDate);
+
       buttonStart.disabled = true;
       let timeInterval = setInterval(() => {
-        console.log('1-i am working...');
         const deltaTime = userDate - getTimeNow();
 
         renderTimer(convertMs(deltaTime));
