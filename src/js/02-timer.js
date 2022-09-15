@@ -20,25 +20,53 @@ const options = {
   minuteIncrement: 1,
 
   onClose(selectedDates) {
-    const dateNow = getTimeNow();
-    const userDate = selectedDates[0].getTime();
-    const deltaTime = userDate - dateNow;
+    let dateNow = getTimeNow();
+    let userDate = selectedDates[0].getTime();
+    let deltaTime = userDate - dateNow;
     if (deltaTime < 0) {
       buttonStart.disabled = true;
       Notify.failure('Please choose a date in the future');
       return;
     }
     buttonStart.disabled = false;
+
     buttonStart.addEventListener('click', function () {
-      const timeUpdateInterval = setInterval(() => {
+      if (!userDate) return;
+      console.log(userDate);
+      buttonStart.disabled = true;
+      let timeInterval = setInterval(() => {
+        console.log('1-i am working...');
         const deltaTime = userDate - getTimeNow();
 
         renderTimer(convertMs(deltaTime));
       }, 1000);
 
-      setTimeout(() => {
-        clearInterval(timeUpdateInterval);
-      }, deltaTime);
+      let timeOut = setTimeout(
+        currentInterval => {
+          clearInterval(currentInterval);
+        },
+        deltaTime,
+        timeInterval
+      );
+
+      if (!document.querySelector('[stop-button]')) {
+        createStopButton();
+        const stopButton = document.querySelector('[stop-button]');
+        setTimeout(() => {
+          stopButton.addEventListener('click', () => {
+            buttonStart.disabled = false;
+            clearInterval(timeInterval);
+            clearTimeout(timeOut);
+
+            dateNow = null;
+            userDate = null;
+            deltaTime = null;
+
+            clearDOM();
+            stopButton.remove();
+          });
+        });
+      }
     });
   },
 };
@@ -68,6 +96,7 @@ function convertMs(ms) {
   );
 
   return {
+    // If days = 0, then return string "00" to DOM, if less than 10 return function that makes two digits from '0*', else return days.
     days: days === 0 ? '00' : days < 10 ? addLeadingZero(days) : days,
     hours,
     minutes,
@@ -80,8 +109,23 @@ function getTimeNow() {
 }
 
 function renderTimer({ days, hours, minutes, seconds }) {
-  daysField.innerHTML = days === 0 ? '00' : days;
+  daysField.innerHTML = days;
   hoursField.innerHTML = hours;
   minutesField.innerHTML = minutes;
   secondsField.innerHTML = seconds;
+}
+
+function clearDOM() {
+  daysField.innerHTML = '00';
+  hoursField.innerHTML = '00';
+  minutesField.innerHTML = '00';
+  secondsField.innerHTML = '00';
+  pickedTime.clear();
+}
+
+function createStopButton() {
+  const stopButton = document.createElement('button');
+  stopButton.setAttribute('stop-button', '');
+  stopButton.innerHTML = 'Stop';
+  buttonStart.after(stopButton);
 }
