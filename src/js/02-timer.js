@@ -5,13 +5,19 @@ import 'flatpickr/dist/flatpickr.min.css';
 
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
-const input = document.querySelector('input#datetime-picker');
-const buttonStart = document.querySelector('[data-start]');
-buttonStart.disabled = true;
-const daysField = document.querySelector('[data-days]');
-const hoursField = document.querySelector('[data-hours]');
-const minutesField = document.querySelector('[data-minutes]');
-const secondsField = document.querySelector('[data-seconds]');
+const refs = {
+  input: document.querySelector('input#datetime-picker'),
+
+  buttonStart: document.querySelector('[data-start]'),
+  buttonStop: document.querySelector('[data-stop]'),
+
+  daysField: document.querySelector('[data-days]'),
+  hoursField: document.querySelector('[data-hours]'),
+  minutesField: document.querySelector('[data-minutes]'),
+  secondsField: document.querySelector('[data-seconds]'),
+};
+
+refs.buttonStart.disabled = true;
 
 const options = {
   enableTime: true,
@@ -23,17 +29,19 @@ const options = {
     let dateNow = getTimeNow();
     let userDate = selectedDates[0].getTime();
     let deltaTime = userDate - dateNow;
+
     if (deltaTime < 0) {
-      buttonStart.disabled = true;
+      refs.buttonStart.disabled = true;
       Notify.failure('Please choose a date in the future');
       return;
     }
-    buttonStart.disabled = false;
 
-    buttonStart.addEventListener('click', function () {
+    refs.buttonStart.disabled = false;
+
+    refs.buttonStart.addEventListener('click', function () {
       if (!userDate) return;
 
-      buttonStart.disabled = true;
+      refs.buttonStart.disabled = true;
       let timeInterval = setInterval(() => {
         const deltaTime = userDate - getTimeNow();
 
@@ -49,11 +57,11 @@ const options = {
       );
 
       if (!document.querySelector('[stop-button]')) {
-        createStopButton();
-        const stopButton = document.querySelector('[stop-button]');
+        stopButtonStyle();
+
         setTimeout(() => {
-          stopButton.addEventListener('click', () => {
-            buttonStart.disabled = false;
+          refs.buttonStop.addEventListener('click', () => {
+            refs.buttonStart.disabled = false;
             clearInterval(timeInterval);
             clearTimeout(timeOut);
 
@@ -62,7 +70,7 @@ const options = {
             deltaTime = null;
 
             clearDOM();
-            stopButton.remove();
+            stopButtonStyle();
           });
         });
       }
@@ -70,7 +78,7 @@ const options = {
   },
 };
 
-const pickedTime = flatpickr(input, options);
+const pickedTime = flatpickr(refs.input, options);
 
 function addLeadingZero(value) {
   return String(value).padStart(2, '0');
@@ -108,23 +116,20 @@ function getTimeNow() {
 }
 
 function renderTimer({ days, hours, minutes, seconds }) {
-  daysField.innerHTML = days;
-  hoursField.innerHTML = hours;
-  minutesField.innerHTML = minutes;
-  secondsField.innerHTML = seconds;
+  refs.daysField.innerHTML = days;
+  refs.hoursField.innerHTML = hours;
+  refs.minutesField.innerHTML = minutes;
+  refs.secondsField.innerHTML = seconds;
 }
 
 function clearDOM() {
-  daysField.innerHTML = '00';
-  hoursField.innerHTML = '00';
-  minutesField.innerHTML = '00';
-  secondsField.innerHTML = '00';
+  refs.daysField.innerHTML = '00';
+  refs.hoursField.innerHTML = '00';
+  refs.minutesField.innerHTML = '00';
+  refs.secondsField.innerHTML = '00';
   pickedTime.clear();
 }
 
-function createStopButton() {
-  const stopButton = document.createElement('button');
-  stopButton.setAttribute('stop-button', '');
-  stopButton.innerHTML = 'Stop';
-  buttonStart.after(stopButton);
+function stopButtonStyle() {
+  refs.buttonStop.classList.toggle('active');
 }
