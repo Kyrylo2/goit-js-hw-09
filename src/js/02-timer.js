@@ -45,6 +45,8 @@ const options = {
       let timeInterval = setInterval(() => {
         const deltaTime = userDate - getTimeNow();
 
+        if (deltaTime < 0) return clearDOM();
+
         renderTimer(convertMs(deltaTime));
       }, 1000);
 
